@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use std::env;
 use std::error::Error;
 use std::fs::File;
+use std::fs;
 use std::io::Read;
 use std::str;
 
@@ -19,12 +20,6 @@ fn is_hidden(entry: &DirEntry) -> bool {
         .unwrap_or(false)
 }
 
-fn is_file(entry: &DirEntry) -> bool {
-    entry.file_name()
-        .to_str()
-        .map(|s| s.contains("."))
-        .unwrap_or(false)
-}
 
 fn dir_to_manifest(dir: &str) -> Result<HashMap<String, String>, Box<Error>> {
     let walker = WalkDir::new(dir).into_iter();
@@ -32,12 +27,13 @@ fn dir_to_manifest(dir: &str) -> Result<HashMap<String, String>, Box<Error>> {
 
     for entry in walker.filter_entry(|e| !is_hidden(e)) {
         let entry = entry?;
+        let path = entry.path();
 
-        if !is_file(&entry) {
+        let md = fs::metadata(path).unwrap();
+        if md.is_dir() {
             continue;
         }
 
-        let path = entry.path();
         let path_display = path.display();
 
         let mut file = File::open(path).expect("File not found.");
