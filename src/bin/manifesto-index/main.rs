@@ -55,10 +55,10 @@ fn dir_to_manifest(dir: &str) -> Result<HashMap<String, String>, Box<Error>> {
 }
 
 fn main() {
-    let _args: Vec<String> = env::args().collect();
-    let dir: &str = &env::args().nth(1).expect("Missing dir path.");
-    match dir_to_manifest(&dir) {
-        Ok(m) => println!("{}", serde_json::to_string(&m).unwrap()),
-        Err(e) => println!("Error: {}", e.to_string()),
-    }
+    let dir: &str = &env::args().nth(1).expect("Missing input directory.");
+
+    let manifest = dir_to_manifest(&dir).expect("Could not build manifest.");
+    let manifest_json = serde_json::to_string(&manifest).expect("Failed to serialize manifest.");
+
+    println!("{}", manifest_json);
 }
