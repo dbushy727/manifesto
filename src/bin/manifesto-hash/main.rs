@@ -1,29 +1,35 @@
 extern crate serde_json;
 
 use std::collections::HashMap;
+
 use std::env;
 use std::fs;
 use std::fs::File;
+use std::io;
 use std::io::Read;
-use std::path::Path;
 
 fn main() {
     let args = &mut env::args();
 
     let manifest_json: &str = &args.nth(1)
         .expect("Missing manifest.json path.");
+
     let target_dir: &str = &args.nth(2)
         .unwrap_or("output/".to_string());
 
-    let manifest_path = Path::new(&manifest_json);
+    let mut reader: Box<Read> = if manifest_json == "-" {
+        Box::new(io::stdin())
+    } else {
+        let file = File::open(manifest_json)
+            .expect("Manifest file not found.");
+        Box::new(file)
+    };
 
-    let mut manifest_file = File::open(manifest_path)
-        .expect("Manifest file not found.");
-    let mut manifest_str = String::new();
-    manifest_file.read_to_string(&mut manifest_str)
-        .expect("Unable to read manifest file.");
+    let mut manifest_buf = Vec::new();
+    io::copy(&mut reader, &mut manifest_buf)
+        .expect("Unable to load manifest.");
 
-    let manifest: HashMap<String, String> = serde_json::from_str(&manifest_str)
+    let manifest: HashMap<String, String> = serde_json::from_slice(&manifest_buf)
         .expect("Invalid manifest.");
 
     fs::create_dir_all(target_dir).expect("Could not create target dir.");
