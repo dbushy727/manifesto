@@ -7,7 +7,8 @@ use std::env;
 use std::error::Error;
 use std::fs::File;
 use std::fs;
-use std::io::Read;
+use std::io;
+use std::io::{Read, Write};
 use std::str;
 
 use walkdir::{DirEntry, WalkDir};
@@ -55,10 +56,19 @@ fn dir_to_manifest(dir: &str) -> Result<HashMap<String, String>, Box<Error>> {
 }
 
 fn main() {
-    let dir: &str = &env::args().nth(1).expect("Missing input directory.");
+    let args: Vec<_> = env::args().collect();
+    let default_output = "manifest.json".to_string();
 
-    let manifest = dir_to_manifest(&dir).expect("Could not build manifest.");
-    let manifest_json = serde_json::to_string(&manifest).expect("Failed to serialize manifest.");
+    let input_dir = args.iter().nth(1).expect("Missing input directory.");
+    let output = args.iter().nth(2).unwrap_or(&default_output);
 
-    println!("{}", manifest_json);
+    let writer: Box<Write> = if output == "-" {
+        Box::new(io::stdout())
+    } else {
+        let file = File::create(output).expect("Unable to create manifest file.");
+        Box::new(file)
+    };
+
+    let manifest = dir_to_manifest(&input_dir).expect("Could not build manifest.");
+    serde_json::to_writer(writer, &manifest).expect("Failed to serialize manifest.");
 }
