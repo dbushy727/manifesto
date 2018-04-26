@@ -7,12 +7,12 @@ use std::env;
 use std::error::Error;
 use std::fs::File;
 use std::fs;
-use std::io;
 use std::io::{Read, Write};
+use std::io;
 use std::str;
 
-use walkdir::{DirEntry, WalkDir};
 use md5::Digest;
+use walkdir::{DirEntry, WalkDir};
 
 fn is_hidden(entry: &DirEntry) -> bool {
     entry
@@ -30,7 +30,7 @@ fn dir_to_manifest(dir: &str) -> Result<HashMap<String, String>, Box<Error>> {
         let entry = entry?;
         let path = entry.path();
 
-        let md = fs::metadata(path).unwrap();
+        let md = fs::metadata(path).expect("Could not read file metadata.");
         if md.is_dir() {
             continue;
         }

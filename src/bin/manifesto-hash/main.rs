@@ -1,12 +1,11 @@
 extern crate serde_json;
 
 use std::collections::HashMap;
-
 use std::env;
-use std::fs;
 use std::fs::File;
-use std::io;
+use std::fs;
 use std::io::Read;
+use std::io;
 
 fn main() {
     let args: Vec<_> = env::args().collect();
