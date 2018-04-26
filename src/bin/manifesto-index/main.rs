@@ -1,3 +1,4 @@
+extern crate manifesto as m;
 extern crate md5;
 extern crate serde_json;
 extern crate walkdir;
@@ -5,11 +6,9 @@ extern crate walkdir;
 use std::collections::HashMap;
 use std::env;
 use std::error::Error;
-use std::fs::{File, OpenOptions};
+use std::fs::File;
 use std::fs;
-use std::io::{Read, Write};
-use std::io;
-use std::path::Path;
+use std::io::Read;
 use std::str;
 
 use md5::Digest;
@@ -63,21 +62,8 @@ fn main() {
     let input_dir = args.iter().nth(1).expect("Missing input directory.");
     let output = args.iter().nth(2).unwrap_or(&default_output);
 
-    let writer: Box<Write> = if output == "-" {
-        Box::new(io::stdout())
-    } else {
-        if let Some(parent) = Path::new(output).parent() {
-            fs::create_dir_all(parent).expect("Could not create output directory.");
-        }
-
-        let file = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .open(output)
-            .expect("Unable to create manifest file.");
-        Box::new(file)
-    };
-
     let manifest = dir_to_manifest(&input_dir).expect("Could not build manifest.");
+    let writer = m::manifest_writer(output);
+
     serde_json::to_writer(writer, &manifest).expect("Failed to serialize manifest.");
 }
