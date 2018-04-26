@@ -5,10 +5,11 @@ extern crate walkdir;
 use std::collections::HashMap;
 use std::env;
 use std::error::Error;
-use std::fs::File;
+use std::fs::{File, OpenOptions};
 use std::fs;
 use std::io::{Read, Write};
 use std::io;
+use std::path::Path;
 use std::str;
 
 use md5::Digest;
@@ -65,7 +66,15 @@ fn main() {
     let writer: Box<Write> = if output == "-" {
         Box::new(io::stdout())
     } else {
-        let file = File::create(output).expect("Unable to create manifest file.");
+        if let Some(parent) = Path::new(output).parent() {
+            fs::create_dir_all(parent).expect("Could not create output directory.");
+        }
+
+        let file = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(output)
+            .expect("Unable to create manifest file.");
         Box::new(file)
     };
 
