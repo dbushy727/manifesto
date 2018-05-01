@@ -57,6 +57,8 @@ fn manifest_from_dir(dir: &str) -> HashMap<String, String> {
             .expect("Cannot convert extention to string.");
         let hashed_name = [hash, ext].join(".");
 
+        let path = path.strip_prefix("public/").unwrap();
+
         manifest.insert(path.display().to_string(), hashed_name);
     }
 
@@ -65,7 +67,7 @@ fn manifest_from_dir(dir: &str) -> HashMap<String, String> {
 
 fn main() {
     let args: Vec<_> = env::args().collect();
-    let default_output = "manifest.json".to_string();
+    let default_output = String::from("manifest.json");
 
     let input_dir = args.iter().nth(1).expect("Missing input directory.");
     let output = args.iter().nth(2).unwrap_or(&default_output);
