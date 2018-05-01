@@ -21,7 +21,7 @@ fn main() {
 
     for (file_name, new_name) in manifest {
         let new_file = [output.to_string(), new_name].join("");
-        fs::copy([String::from("public/"), file_name].join(""), new_file)
+        fs::copy([String::from("public"), file_name].join(""), new_file)
             .expect("Could not rename file.");
     }
 }

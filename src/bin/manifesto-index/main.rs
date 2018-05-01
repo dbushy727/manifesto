@@ -57,7 +57,7 @@ fn manifest_from_dir(dir: &str) -> HashMap<String, String> {
             .expect("Cannot convert extention to string.");
         let hashed_name = [hash, ext].join(".");
 
-        let path = path.strip_prefix("public/").unwrap();
+        let path = path.strip_prefix("public").unwrap();
 
         manifest.insert(path.display().to_string(), hashed_name);
     }
